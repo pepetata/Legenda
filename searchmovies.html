@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="js/jquery-1.12.0.js"></script>
+    <script src="js/main.js"></script>
+
+    <head>
+        <!-- Bootstrap core CSS -->
+        <link href="css/bootstrap.css" rel="stylesheet">
+        <link href="css/custom.css" rel="stylesheet">
+        <title>Legenda</title>
+    <h1>Selecionar filmes</h1>
+</head>
+<?php
+//array of files without directories... optionally filtered by extension 
+function file_list($d, $mask, $list, $nolegends) {
+error_reporting(E_ERROR | E_PARSE);
+$extension_allowed = explode(',', $mask);
+$l[] = '';
+if ($list !== '')
+$l = array_replace($list);
+//echo 'dentro nolegends='.$nolegends.'<br>';
+
+try {
+foreach (array_diff(scandir($d), array('.', '..')) as $f) {
+//echo $f.'  --> '.filesize($d . '\\' . $f).'<br>';
+if (is_dir($d . '\\' . $f)) {
+//echo 'dir ='.$d .'\\'.$f.'<br>';
+$l = $l + file_list($d . '\\' . $f, $mask, $l, $nolegends);
+}
+if (is_file($d . '\\' . $f) && ( filesize($d . '\\' . $f)>500000000 || filesize($d . '\\' . $f)<0)) {
+//echo '-------------------------  grande <br>';
+if ($mask !== '') {
+foreach ($extension_allowed as $e) {
+//                    echo '$e='.$e . '<br>';
+if (strpos($f, $e)) {
+
+// check if it is not a trailer
+
+//got the file, check if there is subtitle
+$fn = substr($f, 0, strpos($f, $e));
+
+// nao testar .str pois quero baixar os pob e pode encontrar em ingles
+$sub = FALSE;
+//$sub = file_exists($d . '\\' . $fn.'.srt');
+if (!$sub) $sub = file_exists($d . '\\' . $fn . '.pob.srt');
+if (!$sub) $sub = file_exists($d . '\\' . $fn . '.pob.0.srt');
+// matar o arq pob.o.srt se tamanho menor q 10
+if ($sub && filesize($d . '\\' . $fn . '.pob.0.srt')<10) {
+unlink($d . '\\' . $fn . '.pob.0.srt');
+unlink($d . '\\' . $fn . '.pob.1.srt');
+unlink($d . '\\' . $fn . '.pob.2.srt');
+unlink($d . '\\' . $fn . '.pob.3.srt');
+unlink($d . '\\' . $fn . '.pob.4.srt');
+unlink($d . '\\' . $fn . '.pob.5.srt');
+}
+if ($nolegends && $sub) {}
+else {
+//echo 'encontrou '.$f.'<br>';
+$l[$f][0] = $sub;
+$l[$f][1] = $d;
+}
+}
+}
+}
+}
+}
+return $l;
+} 
+catch (Exception $e) {
+echo 'Caught exception: ',  $e->getMessage(), "\n";
+}
+}
+
+
+?>
+<body>
+    <div><h3>Lista de Arquivos</h3></div>
+    <button id='selectmovies1' class="btn btn-default" onclick="selectMovies()" type="submit">Selecione Filmes</button>
+    <button id='index' class="btn btn-default" onclick="index()" type="submit">HOME</button>
+    <table id='movies' style="width:100%" class="table table-striped" >
+        <thead>
+            <tr>
+                <th>#</th>
+                <th style="width:60px">Select?</th>
+                <th>Name</th> 
+                <th align="center"style="width:60px">Subtitles?</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            // show only movies with no legend?
+            $qtd=0;
+            $nolegends=FALSE;
+            if (isset($_GET['nolegends'])) {    
+            if ($_GET['nolegends']=='true') $nolegends=TRUE;
+            }
+
+            $dir='';
+            $computer='';
+            // get folder to start
+            if (isset($_GET['dir'])) {    
+            $dir = $_GET['dir'];
+            }
+            if (!$dir) {
+            $dir = getcwd();
+            }
+
+            // get cmputer to start
+            if (isset($_GET['computer'])) {    
+            $computer = $_GET['computer'];
+            }
+
+            // verificar se usa o drive virtual
+            if (strtolower ( $computer )) {
+            if (substr($dir,0,1)) $letter = substr($dir,0,1);
+            else $letter ="Z";
+            $location = $computer;
+            $user = "guest";
+            $pass = "";
+
+            //Execute the command
+            //echo "net use " . $letter . ": \\" . $location . " " . $pass . " /user:" . $user . " /persistent:no";
+            system("net use " . $letter . ": " . $location . " " . $pass . " /user:" . $user . " /persistent:no");
+            }
+
+
+            if (!is_dir($dir)) {
+            echo '<br><br> Diretório '.$dir.' não existe<br><br>';
+            } else {
+
+
+
+            $n = file_list($dir,'.mkv,.avi,.mp4,.wav,.wmv,','', $nolegends); 
+            if ($n)
+            foreach ($n as $f=>$cont){
+            if (isset($cont[0])) {
+            $str = $cont[0];
+            $dir = $cont[1];
+            $qtd++;
+
+
+
+            //Check --------------------
+            echo '<tr><th scope=row>'.$qtd.'</th>';
+            echo'<td ><input type="checkbox" id="selected" checked></td>';
+            // file name
+            echo "<td>".$f."</td>";
+            // subtitles
+            $str = $cont[0];
+            $dir = $cont[1];
+            if ($str) echo '<td align="center">Yes</td>';
+            else echo "<td></td>";
+            echo '<td style="display:none;"><input type="hidden" name="dir" value="'.$dir.'"></td>';
+            echo "</tr>";}
+            }
+            echo '</tbody>';
+            }
+            ?>
+    </table>
+    <button id='selectmovies' class="btn btn-default" onclick="selectMovies()" type="submit">Selecione Filmes</button>
+    <button id='index' class="btn btn-default" onclick="index()" type="submit">HOME</button>
+    <script src="js/bootstrap.js"></script>
+</body>
+</html>

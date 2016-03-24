@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="js/jquery-1.12.0.js"></script>
+<script src="js/main.js"></script>
+
+<head>
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
+
+    <title>Legenda</title>
+<h1>Legenda</h1>
+<script>
+    $(document).ready(function () {
+        // hide computer label
+        var dir = localStorage.getItem('dir');
+        var virtual = 'false';
+        var computer = localStorage.getItem('computer');
+        var nolegends = 'true';
+
+        if (dir) {
+            document.getElementById("directory").value = dir;
+        }
+        if (localStorage.getItem('virtual') == null) {
+            document.getElementById("nolegends").checked = true;
+            document.getElementById("virtual").checked = false;
+        } else {
+            virtual = localStorage.getItem('virtual');
+            nolegends = localStorage.getItem('nolegends');
+        }
+        if (computer)
+            document.getElementById("computer").value = computer;
+
+        if (virtual == 'false') {
+            document.getElementById("lcomputer").style.display = "none";
+            document.getElementById("computer").style.display = "none";
+            document.getElementById("virtual").checked = false;
+        } else
+            document.getElementById("virtual").checked = true;
+        if (nolegends == 'false')
+            document.getElementById("nolegends").checked = false;
+        else
+            document.getElementById("nolegends").checked = true;
+    })
+
+</script>
+<style>
+    body {
+        color: white;}
+
+    </style>
+</head>
+<body >
+   <div style="position:relative; top:0px; left:0px; width:auto; height:1px; opacity:0.3;">
+       <img height="500" width="1000" src="images/twenty.jpg" alt=" " /></div>
+   <div style="position:relative; top:0px; left:0px; width:auto; height:auto;"> 
+    <!--    <img src="images/twenty.jpg" width=100% height=100% alt="Twenty Century Fox">-->
+    <p id="demo"></p>
+
+<!--    <script>
+        document.getElementById("demo").innerHTML =
+                "window width is " + window.innerWidth;
+    </script>-->
+
+
+    <div class="starter-template">
+        <h2>Sistema para buscar legendas de filmes<br></h2>
+        <h3>Informe o diretório de inicio de buscas</h3>
+        <h4>testar git</h4>
+    </div>
+    <form class="form-inline">
+        <div class="form-group">
+            <label for="directory">Directório:   </label>
+            <input type="text" id="directory" class="form-control"  value='C:\Users\fferreira\Desktop\eCommerce\PHP\php for apache\Apache24\htdocs\legenda' size="50">
+        </div>
+    </form>
+    <form class="form-inline">
+        <div class="form-group">
+            <input style="" type="checkbox" id="virtual" onclick="showComputer()">Drive virtual?
+        </div>
+    </form>
+    <form class="form-inline">
+        <div class="form-group">
+            <label id="lcomputer" for="computer">Computador:  </label>
+            <input type="text" id="computer" class="form-control" value="" size="30">
+        </div>
+    </form>
+    <form class="form-inline">
+        <div class="form-group">
+            <input type="checkbox" id="nolegends" checked>Mostrar apenas os filmes sem legenda.
+        </div>
+
+    </form>
+    </br>
+    <button id="search" type="submit" class="btn btn-default" onclick="setdir()">Procurar</button>
+<button  class="btn btn-default" type="submit" class="btn btn-default" onclick="clearvars()">Limpar campos</button>
+
+<script src="js/bootstrap.js"></script>
+</div>
+
+</body>
+
